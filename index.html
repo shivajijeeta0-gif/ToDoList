@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="todoApp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraFlow — Cherry Blossom Rituals</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* Cherry Blossom (Sakura) Theme Variables */
+        :root {
+            --bg-paper: #fff4f6;
+            --bg-surface: #ffffff;
+            --card-bg: rgba(255, 235, 240, 0.75);
+            --card-border: #ffd6e0;
+            --card-hover-border: #fca5ba;
+            --primary: #d65a8a;
+            --primary-hover: #b53d6c;
+            --primary-glow: rgba(214, 90, 138, 0.3);
+            --accent: #e88d67;
+            --accent-light: #fff0eb;
+            --text-main: #4a2c37;
+            --text-sub: #8c6875;
+            --danger: #d94343;
+            --warning: #e88d67;
+            --success: #4fa87b;
+            --nav-bg: rgba(255, 244, 246, 0.85);
+            --shadow-warm: 0 12px 32px rgba(214, 90, 138, 0.12), 0 4px 12px rgba(0, 0, 0, 0.03);
+
+            --handwriting: 'Caveat', cursive;
+            --font-heading: 'Fraunces', serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-paper);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Ambient Radial Grid Overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(var(--card-border) 1.2px, transparent 0);
+            background-size: 28px 28px;
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Animated Cherry Blossom Petals Background (Ambient) */
+        .petals-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .petal {
+            position: absolute;
+            background: linear-gradient(135deg, #ffccd5, #ffb3c1);
+            border-radius: 15px 0 15px 0;
+            opacity: 0.7;
+            animation: fall linear infinite, sway ease-in-out infinite;
+            filter: drop-shadow(0 2px 4px rgba(214, 90, 138, 0.15));
+        }
+
+        .petal:nth-child(1) {
+            left: 10%;
+            width: 12px;
+            height: 18px;
+            animation-duration: 9s, 3s;
+            animation-delay: 0s, 0s;
+        }
+
+        .petal:nth-child(2) {
+            left: 25%;
+            width: 16px;
+            height: 22px;
+            animation-duration: 12s, 4s;
+            animation-delay: 2s, 1s;
+        }
+
+        .petal:nth-child(3) {
+            left: 40%;
+            width: 10px;
+            height: 15px;
+            animation-duration: 8s, 2.5s;
+            animation-delay: 4s, 0.5s;
+        }
+
+        .petal:nth-child(4) {
+            left: 55%;
+            width: 14px;
+            height: 20px;
+            animation-duration: 11s, 3.5s;
+            animation-delay: 1s, 1.5s;
+        }
+
+        .petal:nth-child(5) {
+            left: 70%;
+            width: 18px;
+            height: 24px;
+            animation-duration: 14s, 5s;
+            animation-delay: 3s, 2s;
+        }
+
+        .petal:nth-child(6) {
+            left: 85%;
+            width: 11px;
+            height: 16px;
+            animation-duration: 10s, 3s;
+            animation-delay: 5s, 1s;
+        }
+
+        .petal:nth-child(7) {
+            left: 95%;
+            width: 15px;
+            height: 21px;
+            animation-duration: 13s, 4s;
+            animation-delay: 2.5s, 0.5s;
+        }
+
+        @keyframes fall {
+            0% {
+                top: -10%;
+                transform: rotate(0deg);
+            }
+
+            100% {
+                top: 110%;
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes sway {
+
+            0%,
+            100% {
+                transform: translateX(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateX(50px) rotate(45deg);
+            }
+        }
+
+        /* 🌸 FAST MOTION TRANSITION WINDSTORM OVERLAY */
+        .page-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            overflow: hidden;
+            background: radial-gradient(circle, rgba(255, 244, 246, 0.5) 0%, rgba(255, 214, 224, 0.3) 100%);
+            backdrop-filter: blur(0px);
+            transition: opacity 0.2s ease;
+        }
+
+        .page-transition-overlay.active {
+            opacity: 1;
+            backdrop-filter: blur(4px);
+        }
+
+        .storm-leaf {
+            position: absolute;
+            background: linear-gradient(135deg, #ff758c, #ff7eb3);
+            border-radius: 18px 0 18px 0;
+            opacity: 0;
+            filter: drop-shadow(0 4px 10px rgba(214, 90, 138, 0.4)) blur(0.5px);
+        }
+
+        .page-transition-overlay.active .storm-leaf {
+            animation: fastWindStorm 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .storm-leaf:nth-child(1) {
+            top: 15%;
+            width: 22px;
+            height: 32px;
+            animation-delay: 0.02s !important;
+        }
+
+        .storm-leaf:nth-child(2) {
+            top: 35%;
+            width: 18px;
+            height: 26px;
+            animation-delay: 0.08s !important;
+        }
+
+        .storm-leaf:nth-child(3) {
+            top: 55%;
+            width: 26px;
+            height: 38px;
+            animation-delay: 0.01s !important;
+        }
+
+        .storm-leaf:nth-child(4) {
+            top: 75%;
+            width: 20px;
+            height: 30px;
+            animation-delay: 0.12s !important;
+        }
+
+        .storm-leaf:nth-child(5) {
+            top: 25%;
+            width: 24px;
+            height: 34px;
+            animation-delay: 0.05s !important;
+        }
+
+        .storm-leaf:nth-child(6) {
+            top: 65%;
+            width: 16px;
+            height: 24px;
+            animation-delay: 0.15s !important;
+        }
+
+        .storm-leaf:nth-child(7) {
+            top: 45%;
+            width: 28px;
+            height: 40px;
+            animation-delay: 0.03s !important;
+        }
+
+        .storm-leaf:nth-child(8) {
+            top: 85%;
+            width: 20px;
+            height: 28px;
+            animation-delay: 0.10s !important;
+        }
+
+        @keyframes fastWindStorm {
+            0% {
+                left: -10%;
+                opacity: 0;
+                transform: scale(0.6) rotate(0deg) skewX(-20deg);
+            }
+
+            30% {
+                opacity: 1;
+            }
+
+            70% {
+                opacity: 1;
+            }
+
+            100% {
+                left: 110%;
+                opacity: 0;
+                transform: scale(1.4) rotate(540deg) skewX(20deg);
+            }
+        }
+
+        /* SVG & Icons */
+        .icon {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        /* Navigation Bar */
+        .navbar-wrapper {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            padding: 0 5%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 28px;
+            border-radius: var(--radius-lg);
+            border: 1.5px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            background: var(--nav-bg);
+            box-shadow: var(--shadow-warm);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 22px;
+            color: var(--text-main);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .aura-logo-wrapper {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .aura-logo-svg {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s ease;
+        }
+
+        .aura-logo-bg {
+            fill: #ffe8ee;
+            stroke: var(--card-border);
+            stroke-width: 1.5;
+        }
+
+        .aura-logo-ring {
+            stroke: var(--primary);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-dasharray: 50 15;
+            transform-origin: center;
+            animation: auraSpin 12s linear infinite;
+        }
+
+        .aura-logo-core {
+            fill: var(--accent);
+        }
+
+        .brand:hover .aura-logo-svg {
+            transform: scale(1.1) rotate(10deg);
+        }
+
+        @keyframes auraSpin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .brand-badge {
+            font-family: var(--handwriting);
+            font-size: 18px;
+            font-weight: 700;
+            padding: 2px 12px;
+            border-radius: 12px;
+            background: #ffe8ee;
+            color: var(--primary);
+            border: 1px dashed var(--primary);
+            transform: rotate(-3deg);
+            display: inline-block;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 10px;
+        }
+
+        .nav-link:hover {
+            color: var(--text-main);
+            background: rgba(214, 90, 138, 0.08);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1.5px solid transparent;
+            outline: none;
+            user-select: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 14px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn-outline {
+            background: var(--bg-surface);
+            color: var(--text-main);
+            border-color: var(--card-border);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .btn-outline:hover {
+            background: #fff0f3;
+            border-color: var(--card-hover-border);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Landing Section */
+        .hero {
+            padding: 60px 5% 30px;
+            text-align: center;
+            max-width: 860px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 18px;
+            border-radius: 30px;
+            background: var(--bg-surface);
+            border: 1.5px solid var(--card-border);
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-warm);
+        }
+
+        .hero h1 {
+            font-family: var(--font-heading);
+            font-size: 54px;
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 span.handwritten {
+            font-family: var(--handwriting);
+            color: var(--primary);
+            font-style: normal;
+            font-size: 64px;
+            display: inline-block;
+            transform: rotate(-2deg);
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-sub);
+            max-width: 580px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+
+        .hero-cta {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        /* Feature Cards Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto 80px;
+            padding: 0 5%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-card {
+            background: var(--bg-surface);
+            border: 1.5px solid var(--card-border);
+            padding: 30px 24px;
+            border-radius: var(--radius-lg);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-warm);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--card-hover-border);
+        }
+
+        .feature-card h3 {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+
+        .feature-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            background: #ffe8ee;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border: 1px solid var(--card-border);
+        }
+
+        /* Workspace Application Container */
+        .app-container {
+            max-width: 840px;
+            margin: 20px auto 80px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .app-card {
+            background: var(--bg-surface);
+            border: 1.5px solid var(--card-border);
+            padding: 36px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-warm);
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .greeting-title {
+            font-family: var(--font-heading);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .streak-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: #ffe8ee;
+            border: 1px solid var(--card-border);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* Progress Dashboard Metric Box */
+        .progress-box {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 18px 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 28px;
+            backdrop-filter: blur(8px);
+        }
+
+        .progress-ring-svg {
+            transform: rotate(-90deg);
+            width: 64px;
+            height: 64px;
+            flex-shrink: 0;
+        }
+
+        .progress-ring-bg {
+            stroke: var(--card-border);
+            stroke-width: 6;
+            fill: transparent;
+        }
+
+        .progress-ring-circle {
+            stroke: var(--primary);
+            stroke-width: 6;
+            stroke-linecap: round;
+            fill: transparent;
+            stroke-dasharray: 157;
+            transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            flex: 1;
+        }
+
+        .stat-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--card-border);
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+
+        .stat-box span {
+            display: block;
+            font-size: 10px;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+            font-weight: 600;
+        }
+
+        .stat-box strong {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        /* Input Controls */
+        .input-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        input,
+        select {
+            background: var(--bg-surface);
+            border: 1.5px solid var(--card-border);
+            color: var(--text-main);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: var(--font-body);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        input[type="text"].main-input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .input-row select,
+        .input-row input[type="date"] {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        /* Search & Filter Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding-left: 36px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-sub);
+            pointer-events: none;
+        }
+
+        .filter-pills {
+            display: flex;
+            background: var(--card-bg);
+            padding: 4px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--card-border);
+            gap: 2px;
+        }
+
+        .pill-btn {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pill-btn.active {
+            background: var(--bg-surface);
+            color: var(--primary);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            font-weight: 700;
+        }
+
+        /* Ritual List & Items */
+        .todo-list {
+            list-style: none;
+            max-height: 480px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .todo-item {
+            background: var(--bg-surface);
+            border: 1.5px solid var(--card-border);
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .todo-item:hover {
+            border-color: var(--card-hover-border);
+            transform: translateX(4px);
+        }
+
+        .todo-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+        }
+
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .task-title {
+            font-size: 14px;
+            word-break: break-word;
+            cursor: pointer;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .task-completed {
+            text-decoration: line-through;
+            color: var(--text-sub);
+            opacity: 0.6;
+        }
+
+        .edit-input {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+
+        .meta-tags {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+        }
+
+        .cat-tag {
+            background: #ffe8ee;
+            color: var(--primary);
+            border-color: var(--card-border);
+        }
+
+        .due-tag {
+            background: var(--bg-paper);
+            color: var(--text-sub);
+            border-color: var(--card-border);
+            font-size: 11px;
+        }
+
+        .p-High {
+            color: var(--danger);
+            font-weight: 800;
+        }
+
+        .p-Medium {
+            color: var(--warning);
+            font-weight: 800;
+        }
+
+        .p-Low {
+            color: var(--success);
+            font-weight: 800;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-icon:hover {
+            color: var(--primary);
+            background: #ffe8ee;
+        }
+
+        .btn-icon.delete:hover {
+            color: var(--danger);
+            background: #fde8e8;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-sub);
+        }
+
+        .empty-state h4 {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        /* View Switching Animations */
+        .view-frame {
+            position: relative;
+            width: 100%;
+        }
+
+        .page-view.ng-hide-add {
+            animation: craftFadeOut 0.3s ease forwards;
+        }
+
+        .page-view.ng-hide-remove {
+            animation: craftFadeIn 0.4s ease forwards;
+        }
+
+        .todo-item.ng-enter {
+            animation: itemPopIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .todo-item.ng-leave {
+            animation: itemPopOut 0.25s ease forwards;
+        }
+
+        @keyframes craftFadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.96);
+                filter: blur(4px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes craftFadeOut {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.96);
+                filter: blur(4px);
+            }
+        }
+
+        @keyframes itemPopIn {
+            0% {
+                opacity: 0;
+                transform: translateY(10px) scale(0.96);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes itemPopOut {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+                max-height: 60px;
+                margin-bottom: 10px;
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.9);
+                max-height: 0;
+                margin-bottom: 0;
+                padding: 0;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 38px;
+            }
+
+            .hero h1 span.handwritten {
+                font-size: 46px;
+            }
+
+            .progress-box {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body ng-controller="TodoController">
+
+    <!-- Ambient Falling Cherry Blossom Petals -->
+    <div class="petals-container">
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+    </div>
+
+    <!-- 🌸 Fast Windstorm Transition Flurry Overlay -->
+    <div class="page-transition-overlay" ng-class="{'active': isTransitioning}">
+        <div class="storm-leaf"></div>
+        <div class="storm-leaf"></div>
+        <div class="storm-leaf"></div>
+        <div class="storm-leaf"></div>
+        <div class="storm-leaf"></div>
+        <div class="storm-leaf"></div>
+        <div class="storm-leaf"></div>
+        <div class="storm-leaf"></div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="navbar-wrapper">
+        <nav class="navbar">
+            <div class="brand" ng-click="switchView('landing')">
+                <div class="aura-logo-wrapper">
+                    <svg class="aura-logo-svg" viewBox="0 0 50 50" fill="none">
+                        <rect class="aura-logo-bg" x="4" y="4" width="42" height="42" rx="14" />
+                        <circle class="aura-logo-ring" cx="25" cy="25" r="15" />
+                        <circle class="aura-logo-core" cx="25" cy="25" r="6" />
+                    </svg>
+                </div>
+                AuraFlow
+                <span class="brand-badge">Sakura</span>
+            </div>
+            <div class="nav-links">
+                <a class="nav-link" ng-click="switchView('landing')">Overview</a>
+                <button class="btn btn-primary" ng-click="switchView('app')">
+                    Open Workspace
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Views Container -->
+    <div class="view-frame">
+
+        <!-- Landing View -->
+        <div class="page-view" ng-show="currentView === 'landing'">
+            <section class="hero">
+                <div class="hero-pill">
+                    🌸 Mindful Focus & Handcrafted Daily Rituals
+                </div>
+                <h1>Organize your day with <span class="handwritten">natural tranquility.</span></h1>
+                <p>A calm, organic workspace to prioritize your life, build steady daily momentum, and achieve flow
+                    without ambient noise.</p>
+
+                <div class="hero-cta">
+                    <button class="btn btn-primary" ng-click="switchView('app')" style="padding: 14px 28px;">
+                        Launch Workspace
+                    </button>
+                    <button class="btn btn-outline" ng-click="loadDemoTasks(); switchView('app')"
+                        style="padding: 14px 24px;">
+                        ⚡ Load Sample Rituals
+                    </button>
+                </div>
+            </section>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M12 20h9" />
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                        </svg>
+                    </div>
+                    <h3>Organic Aesthetic</h3>
+                    <p>Designed with warm paper tones, soft floral highlights, and graceful typography to soothe screen
+                        fatigue.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                    </div>
+                    <h3>Interactive Visual Metrics</h3>
+                    <p>Observe your daily progression instantly with seamless dynamic completion rings and statistical
+                        counters.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                    </div>
+                    <h3>Local Storage Persistence</h3>
+                    <p>Your tasks remain completely private and automatically saved inside your browser session memory.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application / Workspace View -->
+        <div class="page-view" ng-show="currentView === 'app'">
+            <div class="app-container">
+                <div class="app-card">
+
+                    <!-- Workspace Header -->
+                    <div class="app-header">
+                        <div>
+                            <h2 class="greeting-title">Daily Rituals</h2>
+                            <p style="font-size: 13px; color: var(--text-sub);">Focus on what truly enriches your day.
+                            </p>
+                        </div>
+                        <div class="streak-badge">
+                            🌸 5 Day Streak
+                        </div>
+                    </div>
+
+                    <!-- Statistics Dashboard Ring -->
+                    <div class="progress-box">
+                        <svg class="progress-ring-svg">
+                            <circle class="progress-ring-bg" cx="32" cy="32" r="25" />
+                            <circle class="progress-ring-circle" cx="32" cy="32" r="25"
+                                ng-style="{'stroke-dashoffset': getRingOffset()}" />
+                        </svg>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <span>Total</span>
+                                <strong>{{todos.length}}</strong>
+                            </div>
+                            <div class="stat-box">
+                                <span>Active</span>
+                                <strong>{{getPendingCount()}}</strong>
+                            </div>
+                            <div class="stat-box">
+                                <span>Done</span>
+                                <strong>{{getCompletedCount()}}</strong>
+                            </div>
+                            <div class="stat-box">
+                                <span>Rate</span>
+                                <strong>{{getCompletionRate()}}%</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Form -->
+                    <form class="input-card" ng-submit="addTodo()">
+                        <div class="input-row">
+                            <input type="text" class="main-input" placeholder="Add a new ritual..." ng-model="newTitle"
+                                required>
+                            <button type="submit" class="btn btn-primary">
+                                Add Ritual
+                            </button>
+                        </div>
+                        <div class="input-row">
+                            <select ng-model="newCategory">
+                                <option value="Work">Work</option>
+                                <option value="Personal">Personal</option>
+                                <option value="Health">Health</option>
+                                <option value="Shopping">Shopping</option>
+                            </select>
+
+                            <select ng-model="newPriority">
+                                <option value="High">High Priority</option>
+                                <option value="Medium">Medium Priority</option>
+                                <option value="Low">Low Priority</option>
+                            </select>
+
+                            <input type="date" ng-model="newDueDate">
+                        </div>
+                    </form>
+
+                    <!-- Filter Controls & Search -->
+                    <div class="controls">
+                        <div class="search-box">
+                            <svg class="icon search-icon" viewBox="0 0 24 24">
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                            <input type="text" placeholder="Search tasks..." ng-model="searchQuery">
+                        </div>
+
+                        <div class="filter-pills">
+                            <button class="pill-btn" ng-class="{'active': filterStatus === 'all'}"
+                                ng-click="filterStatus = 'all'">All</button>
+                            <button class="pill-btn" ng-class="{'active': filterStatus === 'active'}"
+                                ng-click="filterStatus = 'active'">Active</button>
+                            <button class="pill-btn" ng-class="{'active': filterStatus === 'completed'}"
+                                ng-click="filterStatus = 'completed'">Completed</button>
+                        </div>
+                    </div>
+
+                    <!-- Ritual List -->
+                    <ul class="todo-list">
+                        <li class="todo-item" ng-repeat="todo in todos | filter:customFilter"
+                            ng-class="{'completed': todo.completed}">
+                            <div class="todo-left">
+                                <input type="checkbox" class="checkbox-custom" ng-model="todo.completed"
+                                    ng-change="saveToStorage()">
+
+                                <span class="task-title" ng-class="{'task-completed': todo.completed}"
+                                    ng-if="!todo.isEditing" ng-dblclick="startEdit(todo)">
+                                    {{todo.title}}
+                                </span>
+
+                                <input type="text" class="edit-input" ng-if="todo.isEditing" ng-model="todo.title"
+                                    ng-blur="saveEdit(todo)" ng-keyup="$event.keyCode === 13 && saveEdit(todo)">
+                            </div>
+
+                            <div class="meta-tags">
+                                <span class="badge cat-tag">{{todo.category}}</span>
+                                <span class="badge" ng-class="'p-' + todo.priority">{{todo.priority}}</span>
+                                <span class="badge due-tag" ng-if="todo.dueDate">📅 {{todo.dueDate | date:'MMM
+                                    d'}}</span>
+
+                                <div class="item-actions">
+                                    <button class="btn-icon" ng-click="startEdit(todo)" title="Edit Ritual">
+                                        <svg class="icon" viewBox="0 0 24 24">
+                                            <path d="M12 20h9" />
+                                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                        </svg>
+                                    </button>
+                                    <button class="btn-icon delete" ng-click="deleteTodo(todo)" title="Delete Ritual">
+                                        <svg class="icon" viewBox="0 0 24 24">
+                                            <polyline points="3 6 5 6 21 6" />
+                                            <path
+                                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <!-- Empty State View -->
+                    <div class="empty-state" ng-if="(todos | filter:customFilter).length === 0">
+                        <h4>No rituals found</h4>
+                        <p>Enjoy the calm space, or add a new task to get started.</p>
+                    </div>
+
+                    <!-- Footer Options -->
+                    <div style="margin-top: 20px; display: flex; justify-content: flex-end;"
+                        ng-if="getCompletedCount() > 0">
+                        <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;"
+                            ng-click="clearCompleted()">
+                            Clear Completed
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- AngularJS Application Logic Script -->
+    <script>
+        angular.module('todoApp', ['ngAnimate'])
+            .controller('TodoController', ['$scope', '$timeout', function ($scope, $timeout) {
+
+                // App state view initialization
+                $scope.currentView = 'app';
+                $scope.filterStatus = 'all';
+                $scope.searchQuery = '';
+                $scope.isTransitioning = false;
+
+                // Form bindings
+                $scope.newTitle = '';
+                $scope.newCategory = 'Personal';
+                $scope.newPriority = 'Medium';
+                $scope.newDueDate = null;
+
+                // LocalStorage key
+                var STORAGE_KEY = 'auraflow_cherry_todos';
+
+                // Load saved todos or setup defaults
+                var saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    try {
+                        $scope.todos = JSON.parse(saved);
+                    } catch (e) {
+                        $scope.todos = [];
+                    }
+                } else {
+                    $scope.todos = [
+                        { title: 'Morning meditation & green tea', category: 'Health', priority: 'High', completed: true, dueDate: new Date() },
+                        { title: 'Review quarterly goals', category: 'Work', priority: 'Medium', completed: false, dueDate: new Date() },
+                        { title: 'Pick up fresh flowers', category: 'Shopping', priority: 'Low', completed: false, dueDate: null }
+                    ];
+                }
+
+                // Save to browser memory
+                $scope.saveToStorage = function () {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify($scope.todos));
+                };
+
+                // Switch view with Windstorm Petal Flurry transition animation
+                $scope.switchView = function (view) {
+                    if ($scope.currentView === view || $scope.isTransitioning) return;
+
+                    $scope.isTransitioning = true;
+
+                    // Change the page mid-way through the flurry sweep
+                    $timeout(function () {
+                        $scope.currentView = view;
+                    }, 280);
+
+                    // Clear transition overlay status when animation finishes
+                    $timeout(function () {
+                        $scope.isTransitioning = false;
+                    }, 650);
+                };
+
+                // Add new todo task
+                $scope.addTodo = function () {
+                    if (!$scope.newTitle || !$scope.newTitle.trim()) return;
+
+                    $scope.todos.unshift({
+                        title: $scope.newTitle.trim(),
+                        category: $scope.newCategory,
+                        priority: $scope.newPriority,
+                        dueDate: $scope.newDueDate,
+                        completed: false,
+                        isEditing: false
+                    });
+
+                    // Reset form fields
+                    $scope.newTitle = '';
+                    $scope.newDueDate = null;
+                    $scope.saveToStorage();
+                };
+
+                // Delete todo task
+                $scope.deleteTodo = function (todo) {
+                    var index = $scope.todos.indexOf(todo);
+                    if (index > -1) {
+                        $scope.todos.splice(index, 1);
+                        $scope.saveToStorage();
+                    }
+                };
+
+                // Inline editing helpers
+                $scope.startEdit = function (todo) {
+                    todo.isEditing = true;
+                };
+
+                $scope.saveEdit = function (todo) {
+                    todo.isEditing = false;
+                    if (!todo.title.trim()) {
+                        $scope.deleteTodo(todo);
+                    } else {
+                        $scope.saveToStorage();
+                    }
+                };
+
+                // Clear finished tasks
+                $scope.clearCompleted = function () {
+                    $scope.todos = $scope.todos.filter(function (t) { return !t.completed; });
+                    $scope.saveToStorage();
+                };
+
+                // Dynamic filter calculator
+                $scope.customFilter = function (todo) {
+                    var matchesStatus = true;
+                    if ($scope.filterStatus === 'active') matchesStatus = !todo.completed;
+                    if ($scope.filterStatus === 'completed') matchesStatus = todo.completed;
+
+                    var matchesSearch = true;
+                    if ($scope.searchQuery) {
+                        var q = $scope.searchQuery.toLowerCase();
+                        matchesSearch = todo.title.toLowerCase().indexOf(q) !== -1 ||
+                            todo.category.toLowerCase().indexOf(q) !== -1;
+                    }
+
+                    return matchesStatus && matchesSearch;
+                };
+
+                // Metric Calculations
+                $scope.getPendingCount = function () {
+                    return $scope.todos.filter(function (t) { return !t.completed; }).length;
+                };
+
+                $scope.getCompletedCount = function () {
+                    return $scope.todos.filter(function (t) { return t.completed; }).length;
+                };
+
+                $scope.getCompletionRate = function () {
+                    if ($scope.todos.length === 0) return 0;
+                    return Math.round(($scope.getCompletedCount() / $scope.todos.length) * 100);
+                };
+
+                // Circular ring SVG offset math
+                $scope.getRingOffset = function () {
+                    var total = 157; // 2 * PI * r (25)
+                    var rate = $scope.getCompletionRate();
+                    return total - (total * (rate / 100));
+                };
+
+                // Demo task seeder
+                $scope.loadDemoTasks = function () {
+                    $scope.todos = [
+                        { title: 'Morning mindfulness session', category: 'Health', priority: 'High', completed: true, dueDate: new Date() },
+                        { title: 'Draft project proposals', category: 'Work', priority: 'High', completed: false, dueDate: new Date() },
+                        { title: 'Plant cherry blossom bonsai', category: 'Personal', priority: 'Medium', completed: false, dueDate: null },
+                        { title: 'Purchase organic herbal teas', category: 'Shopping', priority: 'Low', completed: false, dueDate: null }
+                    ];
+                    $scope.saveToStorage();
+                };
+
+            }]);
+    </script>
+</body>
+
+</html><!-- Site deployment complete -->
